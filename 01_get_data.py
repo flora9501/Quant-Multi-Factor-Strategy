@@ -4,7 +4,7 @@ import time
 import os
 
 # 1. 初始化
-ts.set_token('066c36e0b8185533c45cbbcc911277566a2fd6852bc8bae4d363324e')
+ts.set_token('请输入你的TOKEN')
 pro = ts.pro_api()
 
 # 2. 建文件夹
