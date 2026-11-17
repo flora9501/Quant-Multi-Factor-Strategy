@@ -44,7 +44,8 @@ This project is an independent quantitative research pipeline that implements a 
 *   **Severe Drawdown**: The significant drawdown of **-38.97%** during 2021 indicates a severe factor exposure to size (small-cap) and style (growth) risks.
 *   **Root Cause**: Due to the lack of sector/market-cap neutralization, the strategy suffered heavily during the 2021 "core assets" crash.
 
-<img width="1106" height="631" alt="截屏2026-11-17 23 18 08" src="https://github.com/user-attachments/assets/1bd5f25a-29f2-4b90-b2f3-db85eaa1bd3e" />
+<img width="1000" height="500" alt="Figure_2" src="https://github.com/user-attachments/assets/bbe0f8dc-2b81-42d2-a566-52367e8c8eda" />
+
 
 ### V2.0 LightGBM Multi-Factor Model (Failed Baseline)
 
