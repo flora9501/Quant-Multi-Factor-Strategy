@@ -35,3 +35,19 @@ This project is an independent quantitative research pipeline that implements a 
 ## 💻 Tech Stack
 - **Language**: Python 3
 - **Libraries**: Pandas, NumPy, Matplotlib, SciPy, Tushare
+
+
+
+<img width="1000" height="500" alt="Figure_1" src="https://github.com/user-attachments/assets/ea952f7c-ffd1-4fad-8520-e7afe104d207" />
+
+Risk Analysis: The significant drawdown of -38.97% during 2021 indicates a severe factor exposure to size (small-cap) and style (growth) risks. Due to the lack of sector/market-cap neutralization, the strategy suffered during the 2021 "core assets" crash.
+
+<img width="1106" height="631" alt="截屏2026-11-17 23 18 08" src="https://github.com/user-attachments/assets/1bd5f25a-29f2-4b90-b2f3-db85eaa1bd3e" />
+
+V2.0 LightGBM Multi-Factor Model (Failed Baseline)
+
+Performance: Annualized Return: -16.04%, Sharpe: -0.75 (2022-2023 Out-of-Sample).
+Research Note / Post-Mortem (复盘分析):
+Low Signal-to-Noise Ratio: The model severely overfitted the training set (2018-2021). Tree-based models capture noise easily in small datasets.
+Distribution Shift: The market regime shifted drastically in 2022. The model learned outdated non-linear relationships.
+Next Step: I plan to address this by (a) expanding the stock pool to the entire A-share market to increase sample size, (b) implementing Market-Cap and Sector Neutralization, and (c) switching to a Linear Model with L1 Regularization (Lasso) which is much more robust for time-series factor data.
