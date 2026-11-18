@@ -59,3 +59,21 @@ This project is an independent quantitative research pipeline that implements a 
 1.  Expanding the stock pool to the entire A-share market to increase sample size.
 2.  Implementing Market-Cap and Sector Neutralization.
 3.  Switching to a Linear Model with L1 Regularization (Lasso) which is much more robust for time-series factor data.
+
+
+
+
+<img width="1000" height="500" alt="Figure_3" src="https://github.com/user-attachments/assets/05971703-8f75-4ccd-9a12-917391489451" />
+### V3.0 Advanced LightGBM (Neutralized & Real Features)
+
+**Performance**: Annualized Return: -33.38%, Sharpe: -1.47 (2022-2023 Out-of-Sample).
+
+**Research Note (深度归因分析)**:
+*   **Over-Neutralization**: The daily cross-sectional neutralization against market cap (log_mv) may have removed genuine alpha signals inherent in size-related risks.
+*   **Transaction Cost Drag**: The strategy used a daily rebalancing frequency with a 0.2% round-trip cost, resulting in a massive cost drag (nearly 50% annualized).
+*   **Regime Shift**: The extreme style rotation in the A-share market (2022-2023) rendered the non-linear relationships learned from the 2018-2021 training set completely invalid.
+
+**Next Steps (未来优化方向)**:
+1.  **Low-Frequency Rebalancing**: Change from daily to weekly (5-day) rebalancing to drastically reduce trading costs.
+2.  **Lasso Regression**: Implement a linear model with L1 regularization, which is much more robust for time-series factor data than tree-based models.
+
