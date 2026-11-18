@@ -1,65 +1,60 @@
-import tushare as ts
+import akshare as ak
 import pandas as pd
 import time
 import os
 
-# 1. 初始化
-ts.set_token('请输入你的TOKEN')
-pro = ts.pro_api()
+if not os.path.exists('data_ak'):
+    os.makedirs('data_ak')
 
-# 2. 建文件夹
-if not os.path.exists('data'):
-    os.makedirs('data')
+print("正在获取全 A 股股票列表...")
+# 获取 A 股实时行情，顺便拿到所有股票代码
+stock_spot = ak.stock_zh_a_spot_em()
+# 我们取市值最大的前 200 只股票作为我们的股票池
+stock_spot['总市值'] = pd.to_numeric(stock_spot['总市值'], errors='coerce')
+stock_spot = stock_spot.sort_values('总市值', ascending=False).head(200)
+stock_codes = stock_spot['代码'].tolist()
 
-# 3. 直接写死 100 只具有代表性的股票代码（包含沪深主板、创业板等）
-# 这样就能完美避开 stock_basic 接口的调用限制！
-stock_codes = [
-    '600519.SH', '601318.SH', '600036.SH', '601166.SH', '600900.SH',
-    '600276.SH', '601888.SH', '600030.SH', '601012.SH', '600887.SH',
-    '601398.SH', '601288.SH', '601988.SH', '601939.SH', '600028.SH',
-    '601857.SH', '600050.SH', '601088.SH', '601668.SH', '601818.SH',
-    '000858.SZ', '000333.SZ', '000651.SZ', '000001.SZ', '000002.SZ',
-    '000063.SZ', '000100.SZ', '000725.SZ', '002415.SZ', '002594.SZ',
-    '300750.SZ', '300059.SZ', '300015.SZ', '300124.SZ', '300014.SZ',
-    '600309.SH', '600690.SH', '600104.SH', '601601.SH', '601628.SH',
-    '601211.SH', '601336.SH', '600809.SH', '600438.SH', '601899.SH',
-    '603259.SH', '603288.SH', '600031.SH', '600048.SH', '601633.SH',
-    '600104.SH', '600585.SH', '600406.SH', '600588.SH', '600570.SH',
-    '002230.SZ', '002475.SZ', '002714.SZ', '300142.SZ', '300274.SZ',
-    '300122.SZ', '300347.SZ', '300408.SZ', '300450.SZ', '300496.SZ',
-    '601919.SH', '601390.SH', '601186.SH', '601766.SH', '601989.SH',
-    '600016.SH', '600000.SH', '601328.SH', '601658.SH', '601138.SH',
-    '000568.SZ', '000538.SZ', '000876.SZ', '000895.SZ', '002304.SZ',
-    '002027.SZ', '002352.SZ', '002493.SZ', '002812.SZ', '002821.SZ',
-    '600183.SH', '600745.SH', '600893.SH', '600760.SH', '601689.SH',
-    '603501.SH', '603986.SH', '688981.SH', '688036.SH', '688012.SH'
-]
+print(f"目标：拉取 {len(stock_codes)} 只股票（市值前200）的数据...")
 
-print(f"目标：拉取 {len(stock_codes)} 只股票从 2018 到 2023 的数据。")
-
-# 4. 循环拉取并保存
-for index, ts_code in enumerate(stock_codes):
-    file_name = f"data/{ts_code}.csv"
-    
+for index, code in enumerate(stock_codes):
+    file_name = f"data_ak/{code}.csv"
     if os.path.exists(file_name):
-        print(f"[{index+1}/{len(stock_codes)}] {ts_code} 已存在，跳过。")
         continue
         
-    print(f"[{index+1}/{len(stock_codes)}] 正在拉取: {ts_code}")
+    print(f"[{index+1}/{len(stock_codes)}] 正在拉取: {code}")
     
     try:
-        df = pro.daily(ts_code=ts_code, start_date='20180101', end_date='20231231')
+        # 1. 拉取前复权日线行情 (注意接口名改成了 _em)
+        df_price = ak.stock_zh_a_hist_em(
+            symbol=code, period="daily", 
+            start_date="20180101", end_date="20231231", adjust="qfq"
+        )
         
-        if not df.empty:
-            df.to_csv(file_name, index=False)
-        else:
-            print(f"  警告: {ts_code} 数据为空")
+        if df_price.empty:
+            continue
             
-        # 免费接口有频次限制，每次请求后必须休眠
-        time.sleep(1.5) 
+        # 映射中文列名到英文
+        df_price.rename(columns={
+            '日期': 'trade_date', '开盘': 'open', '收盘': 'close',
+            '最高': 'high', '最低': 'low', '成交量': 'vol', 
+            '涨跌幅': 'pct_chg', '换手率': 'turnover'
+        }, inplace=True)
+        
+        # 2. 获取当前总市值 (用于后续中性化)
+        try:
+            info = ak.stock_individual_info_em(symbol=code)
+            total_mv = info.loc[info['item'] == '总市值', 'value'].values[0]
+            df_price['total_mv'] = pd.to_numeric(total_mv, errors='coerce')
+        except:
+            df_price['total_mv'] = float('nan')
+            
+        df_price['ts_code'] = code
+        df_price.to_csv(file_name, index=False)
+        
+        time.sleep(0.3) # 稍微休眠，防封
         
     except Exception as e:
-        print(f"  报错: {ts_code} 拉取失败。错误信息: {e}")
-        time.sleep(3) 
+        print(f"拉取 {code} 失败: {e}")
+        time.sleep(1)
 
-print("\n数据拉取全部完成！请查看 data 文件夹。")
+print("数据拉取全部完成！请查看 data_ak 文件夹。")
