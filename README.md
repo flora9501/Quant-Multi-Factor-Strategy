@@ -77,3 +77,14 @@ This project is an independent quantitative research pipeline that implements a 
 1.  **Low-Frequency Rebalancing**: Change from daily to weekly (5-day) rebalancing to drastically reduce trading costs.
 2.  **Lasso Regression**: Implement a linear model with L1 regularization, which is much more robust for time-series factor data than tree-based models.
 
+
+
+<img width="1000" height="500" alt="Figure_5" src="https://github.com/user-attachments/assets/c90e4ab7-02f3-4d46-933a-a507a617911c" />
+### V4.0 Linear Model (Lasso) with 5-Day Rebalancing
+
+**Performance**: Annualized Return: -26.12%, Sharpe: -2.17, Max Drawdown: -12.09% (2022-2023).
+
+**Research Note (研究结论)**:
+*   **Significant Risk Reduction**: By switching from LightGBM to Lasso (L1 regularization) and changing the rebalancing frequency from daily to weekly (5-day), the strategy's **Max Drawdown was reduced from -49.94% to -12.09%**, and annualized volatility dropped from 22.73% to 12.03%.
+*   **Factor Robustness**: Lasso successfully eliminated noisy factors. However, the model still suffered negative returns in 2022-2023 due to the extreme market regime shift and the market-neutral strategy's failure to capture the macro beta.
+*   **Conclusion**: In low signal-to-noise ratio environments, simple linear models with strong regularization (Lasso) offer much better risk control than complex tree-based models, but require further macro overlays or factor neutralization to survive extreme periods.
